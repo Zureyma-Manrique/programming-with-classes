@@ -32,6 +32,8 @@ class Program
             {
                 case "1":
                     string prompt = promptGenerator.GetRandomPrompt();
+                    string quote = promptGeneratorGetRandomQuote();
+                    
                     Console.WriteLine($"Prompt: {prompt}");
 
                     Console.Write("Your response: ");
@@ -53,6 +55,9 @@ class Program
                     };
                     
                     journal.AddEntry(newEntry);
+                    
+                    Console.WriteLine($"{quote}");
+                    
                     break;
 
                 case "2":
