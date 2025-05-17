@@ -32,7 +32,7 @@ class Program
             {
                 case "1":
                     string prompt = promptGenerator.GetRandomPrompt();
-                    string quote = promptGeneratorGetRandomQuote();
+                    string quote = promptGenerator.GetRandomQuote();
                     
                     Console.WriteLine($"Prompt: {prompt}");
 
