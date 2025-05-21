@@ -10,9 +10,11 @@ class Program
         JournalEntry journal = new JournalEntry();
         PromptGenerator promptGenerator = new PromptGenerator();
 
-        // Define your default directory (change this as needed)
-        string defaultDirectory = "C:\\Users\\Admin\\OneDrive\\Documents\\BYU\\Term3\\programming-with-classes\\week02\\Journal\\sources";
-        Directory.CreateDirectory(defaultDirectory); // Ensure it exists
+        string baseDirectory = AppContext.BaseDirectory; // bin/Debug/net6.0/
+        string projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..")); // go up to project root
+        string defaultDirectory = Path.Combine(projectRoot, "week02", "Journal", "sources"); // Ensure it exists
+
+        Directory.CreateDirectory(defaultDirectory);
 
         bool quit = false;
         while (!quit)
