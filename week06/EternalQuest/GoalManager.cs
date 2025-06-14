@@ -74,9 +74,17 @@ public class GoalManager
         }
     }
 
-    public void SaveGoals()
+    public void SaveGoals(string fileName = "goals.txt")
     {
-        using (StreamWriter sw = new StreamWriter("goals.txt"))
+        string baseDirectory = AppContext.BaseDirectory;
+        string projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\.."));
+        string saveDirectory = Path.Combine(projectRoot, "sources");
+
+        Directory.CreateDirectory(saveDirectory);
+
+        string filePath = Path.Combine(saveDirectory, fileName);
+
+        using (StreamWriter sw = new StreamWriter(filePath, append: false))
         {
             sw.WriteLine(_score);
             sw.WriteLine(_level);
@@ -86,30 +94,65 @@ public class GoalManager
                 sw.WriteLine(g.GetStringRepresentation());
             }
         }
-        Console.WriteLine("Goals saved.");
+        Console.WriteLine($"Goals saved to {filePath}");
     }
 
-    public void LoadGoals()
+    public void LoadGoals(string fileName = "goals.txt")
     {
+        string baseDirectory = AppContext.BaseDirectory;
+        string projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\.."));
+        string saveDirectory = Path.Combine(projectRoot, "sources");
+        string filePath = Path.Combine(saveDirectory, fileName);
+        
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine($"File not found: {filePath}");
+            return;
+        }
+        
         _goals.Clear();
-        string[] lines = File.ReadAllLines("goals.txt");
+        string[] lines = File.ReadAllLines(filePath);
+        
+        if (lines.Length < 3)
+        {
+            Console.WriteLine("File format invalid or incomplete.");
+            return;
+        }
+        
         _score = int.Parse(lines[0]);
         _level = int.Parse(lines[1]);
         _badges = new List<string>(lines[2].Split(';'));
+        
         for (int i = 3; i < lines.Length; i++)
         {
             string[] parts = lines[i].Split(":");
+            if (parts.Length < 2) continue;
+
             string type = parts[0];
             string[] data = parts[1].Split(',');
+            
+            try
+            {
+                switch (type)
+                {
+                    case "SimpleGoal":
+                        _goals.Add(new SimpleGoal(data[0], data[1], int.Parse(data[2])));
+                        break;
+                    case "EternalGoal":
+                        _goals.Add(new EternalGoal(data[0], data[1], int.Parse(data[2])));
+                        break;
+                    case "ChecklistGoal":
+                        _goals.Add(new ChecklistGoal(data[0], data[1], int.Parse(data[2]), int.Parse(data[4]), int.Parse(data[3])));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading goal from line {i + 1}: {ex.Message}");
+            }
 
-            if (type == "SimpleGoal")
-                _goals.Add(new SimpleGoal(data[0], data[1], int.Parse(data[2])));
-            else if (type == "EternalGoal")
-                _goals.Add(new EternalGoal(data[0], data[1], int.Parse(data[2])));
-            else if (type == "ChecklistGoal")
-                _goals.Add(new ChecklistGoal(data[0], data[1], int.Parse(data[2]), int.Parse(data[4]), int.Parse(data[3])));
         }
-        Console.WriteLine("Goals loaded.");
+        Console.WriteLine($"Goals loaded from {filePath}");
     }
 
     private void CheckLevelUp()
